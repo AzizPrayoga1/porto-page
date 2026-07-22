@@ -31,7 +31,7 @@ export default function AchievementCard({ eventName, eventDate, rank, points, te
         </p>
         {points !== null && (
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            <span className="font-medium">Poin Terkumpul:</span> {points} pts
+            <span className="font-medium">Poin Terkumpul:</span> {Math.round(points * 100) / 100} pts
           </p>
         )}
       </div>

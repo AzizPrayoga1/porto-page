@@ -1,6 +1,8 @@
 import { drizzle } from 'drizzle-orm/d1';
 import * as schema from '../src/db/schema';
 import { eq } from 'drizzle-orm';
+import { GitHubService } from '../src/services/github';
+import { CTFtimeService } from '../src/services/ctftime';
 
 export interface Env {
   DB: D1Database;
@@ -33,47 +35,77 @@ export default {
     const mockProjects = [
       {
         id: "repo-1",
-        name: "auto-portfolio",
-        description: "Self-updating developer & CTF portfolio platform on Cloudflare.",
+        name: "porto-page",
+        description: "Personal portfolio website with Astro and TailwindCSS.",
         language: "TypeScript",
         topics: JSON.stringify(["astro", "cloudflare", "drizzle", "react"]),
-        stars: 12,
-        forks: 2,
-        url: "https://github.com/octocat/auto-portfolio",
+        stars: 0,
+        forks: 0,
+        url: "https://github.com/AzizPrayoga1/porto-page",
         isPinned: true,
         isHidden: false,
-        adminNote: "Built during hackathon",
-        lastPushedAt: new Date("2026-07-20T12:00:00Z").getTime(),
+        adminNote: "Personal website",
+        lastPushedAt: new Date("2026-07-22T10:00:00Z").getTime(),
         lastSyncedAt: new Date("2026-07-22T00:00:00Z").getTime(),
       },
       {
         id: "repo-2",
-        name: "ctf-exploit-kit",
-        description: "Collection of automated exploit scripts for various CTF categories.",
-        language: "Python",
-        topics: JSON.stringify(["ctf", "exploit", "pwn", "security"]),
-        stars: 45,
-        forks: 8,
-        url: "https://github.com/octocat/ctf-exploit-kit",
+        name: "whatsapp-trading-analyze",
+        description: "Automated analysis tool for trading signals via WhatsApp messages.",
+        language: "JavaScript",
+        topics: JSON.stringify(["whatsapp", "trading", "analysis"]),
+        stars: 0,
+        forks: 0,
+        url: "https://github.com/AzizPrayoga1/whatsapp-trading-analyze",
         isPinned: true,
         isHidden: false,
-        adminNote: "Most popular repo",
-        lastPushedAt: new Date("2026-07-15T08:30:00Z").getTime(),
+        adminNote: null,
+        lastPushedAt: new Date("2026-07-20T08:30:00Z").getTime(),
         lastSyncedAt: new Date("2026-07-22T00:00:00Z").getTime(),
       },
       {
         id: "repo-3",
-        name: "dotfiles",
-        description: "My personal developer workspace configs for Neovim and Tmux.",
-        language: "Lua",
-        topics: JSON.stringify(["neovim", "tmux", "dotfiles"]),
-        stars: 3,
+        name: "absen-face-recognition",
+        description: "Face recognition attendance check-in system using Python.",
+        language: "Python",
+        topics: JSON.stringify(["opencv", "face-recognition", "python"]),
+        stars: 0,
         forks: 0,
-        url: "https://github.com/octocat/dotfiles",
+        url: "https://github.com/AzizPrayoga1/absen-face-recognition",
+        isPinned: true,
+        isHidden: false,
+        adminNote: "Machine learning integration",
+        lastPushedAt: new Date("2026-07-15T00:00:00Z").getTime(),
+        lastSyncedAt: new Date("2026-07-22T00:00:00Z").getTime(),
+      },
+      {
+        id: "repo-4",
+        name: "quiz_in",
+        description: "Mobile quiz application built with Kotlin.",
+        language: "Kotlin",
+        topics: JSON.stringify(["kotlin", "android", "quiz"]),
+        stars: 0,
+        forks: 0,
+        url: "https://github.com/AzizPrayoga1/quiz_in",
         isPinned: false,
         isHidden: false,
         adminNote: null,
-        lastPushedAt: new Date("2026-07-22T10:00:00Z").getTime(),
+        lastPushedAt: new Date("2026-07-10T12:00:00Z").getTime(),
+        lastSyncedAt: new Date("2026-07-22T00:00:00Z").getTime(),
+      },
+      {
+        id: "repo-5",
+        name: "spp-ukom-smk-2023",
+        description: "Student payment management application for school project.",
+        language: "PHP",
+        topics: JSON.stringify(["php", "laravel", "mysql"]),
+        stars: 0,
+        forks: 0,
+        url: "https://github.com/AzizPrayoga1/spp-ukom-smk-2023",
+        isPinned: false,
+        isHidden: false,
+        adminNote: null,
+        lastPushedAt: new Date("2026-06-25T00:00:00Z").getTime(),
         lastSyncedAt: new Date("2026-07-22T00:00:00Z").getTime(),
       }
     ];
@@ -81,31 +113,41 @@ export default {
     const mockAchievements = [
       {
         id: "ctf-1",
-        eventName: "Google CTF 2026",
-        eventDate: new Date("2026-06-25").getTime(),
-        rank: 42,
-        points: 1550.5,
-        teamName: "KuroCyber",
+        eventName: "bhackari CTF 2026",
+        eventDate: new Date("2026-07-05").getTime(),
+        rank: 7,
+        points: 3692.0,
+        teamName: "NVC",
         isHidden: false,
         lastSyncedAt: new Date("2026-07-22").getTime(),
       },
       {
         id: "ctf-2",
-        eventName: "DEF CON CTF 34 Quals",
-        eventDate: new Date("2026-05-18").getTime(),
-        rank: 18,
-        points: 3400.0,
-        teamName: "KuroCyber",
+        eventName: "squ1rrel CTF 2026",
+        eventDate: new Date("2026-06-15").getTime(),
+        rank: 21,
+        points: 6132.0,
+        teamName: "NVC",
         isHidden: false,
         lastSyncedAt: new Date("2026-07-22").getTime(),
       },
       {
         id: "ctf-3",
-        eventName: "InnoSec CTF 2026",
-        eventDate: new Date("2026-07-10").getTime(),
-        rank: 2,
-        points: 420.0,
-        teamName: "KuroCyber (Individu)",
+        eventName: "BlueHens CTF 2026",
+        eventDate: new Date("2026-05-20").getTime(),
+        rank: 55,
+        points: 1670.0,
+        teamName: "NVC",
+        isHidden: false,
+        lastSyncedAt: new Date("2026-07-22").getTime(),
+      },
+      {
+        id: "ctf-4",
+        eventName: "UMDCTF 2026",
+        eventDate: new Date("2026-04-18").getTime(),
+        rank: 177,
+        points: 725.0,
+        teamName: "NVC",
         isHidden: false,
         lastSyncedAt: new Date("2026-07-22").getTime(),
       }
@@ -143,6 +185,9 @@ export default {
       if (url.pathname === '/api/stats' && request.method === 'GET') {
         let projectsCount = mockProjects.length;
         let achievementsCount = mockAchievements.length;
+        let ctftimeGlobalRating = 145.63;
+        let ctftimeCountryRank = 10;
+        let ratingHistoryList: any[] = [{ year: 2026, ratingPoints: 145.63, countryRank: 10 }];
 
         if (db) {
           try {
@@ -150,6 +195,22 @@ export default {
             const ctfList = await db.select().from(schema.ctfAchievements);
             projectsCount = projList.length || projectsCount;
             achievementsCount = ctfList.length || achievementsCount;
+
+            const dbRatingHistory = await db.select().from(schema.ctfRatingHistory).orderBy(schema.ctfRatingHistory.year);
+            if (dbRatingHistory.length > 0) {
+              ratingHistoryList = dbRatingHistory.map(r => ({
+                year: r.year,
+                ratingPoints: r.ratingPoints,
+                countryRank: r.countryRank
+              }));
+
+              // Find 2026 rating details specifically
+              const r2026 = dbRatingHistory.find(r => r.year === 2026);
+              if (r2026) {
+                ctftimeGlobalRating = r2026.ratingPoints;
+                ctftimeCountryRank = r2026.countryRank || ctftimeCountryRank;
+              }
+            }
           } catch (e) {
             // Fallback
           }
@@ -158,29 +219,101 @@ export default {
         return Response.json({
           projectsCount,
           achievementsCount,
-          ctftimeGlobalRating: 2450.5,
-          ctftimeGlobalRank: 124,
+          ctftimeGlobalRating,
+          ctftimeCountryRank,
+          ratingHistory: ratingHistoryList
         }, { headers: corsHeaders });
       }
 
       if (url.pathname === '/api/sync/github' && request.method === 'POST') {
-        // TODO: Implement actual GitHub sync logic using GitHub API & Drizzle upsert
-        // Technical Reason: External sync engines are out of scope for the current milestone (50% target).
-        return Response.json({
-          success: true,
-          message: "Sync GitHub triggered (mock response). GitHub API integration is pending.",
-          itemsSyncedCount: 0
-        }, { headers: corsHeaders });
+        if (!db) {
+          return Response.json({
+            success: false,
+            message: "Database connection not available.",
+          }, { status: 500, headers: corsHeaders });
+        }
+
+        try {
+          const githubService = new GitHubService(
+            env.GITHUB_USERNAME || 'AzizPrayoga1',
+            env.GITHUB_TOKEN
+          );
+
+          const result = await githubService.syncRepositories(db);
+
+          await db.insert(schema.syncLogs).values({
+            source: 'github',
+            triggerType: 'manual',
+            status: 'success',
+            newItemsCount: result.newItemsCount + result.updatedItemsCount,
+            executedAt: new Date(),
+          });
+
+          return Response.json({
+            success: true,
+            message: "GitHub sync completed successfully.",
+            itemsSyncedCount: result.newItemsCount + result.updatedItemsCount
+          }, { headers: corsHeaders });
+        } catch (e: any) {
+          await db.insert(schema.syncLogs).values({
+            source: 'github',
+            triggerType: 'manual',
+            status: 'failed',
+            newItemsCount: 0,
+            errorMessage: e.message || String(e),
+            executedAt: new Date(),
+          });
+
+          return Response.json({
+            success: false,
+            message: `GitHub sync failed: ${e.message || String(e)}`,
+          }, { status: 500, headers: corsHeaders });
+        }
       }
 
       if (url.pathname === '/api/sync/ctftime' && request.method === 'POST') {
-        // TODO: Implement actual CTFtime scraping / API parsing
-        // Technical Reason: CTFtime scraping engine is out of scope for the current milestone.
-        return Response.json({
-          success: true,
-          message: "Sync CTFtime triggered (mock response). CTFtime scraping engine is pending.",
-          itemsSyncedCount: 0
-        }, { headers: corsHeaders });
+        if (!db) {
+          return Response.json({
+            success: false,
+            message: "Database connection not available.",
+          }, { status: 500, headers: corsHeaders });
+        }
+
+        try {
+          const ctftimeService = new CTFtimeService(
+            env.CTFTIME_TEAM_ID || '426938'
+          );
+
+          const result = await ctftimeService.syncAchievements(db);
+
+          await db.insert(schema.syncLogs).values({
+            source: 'ctftime',
+            triggerType: 'manual',
+            status: 'success',
+            newItemsCount: result.newAchievementsCount,
+            executedAt: new Date(),
+          });
+
+          return Response.json({
+            success: true,
+            message: "CTFtime sync completed successfully.",
+            itemsSyncedCount: result.newAchievementsCount
+          }, { headers: corsHeaders });
+        } catch (e: any) {
+          await db.insert(schema.syncLogs).values({
+            source: 'ctftime',
+            triggerType: 'manual',
+            status: 'failed',
+            newItemsCount: 0,
+            errorMessage: e.message || String(e),
+            executedAt: new Date(),
+          });
+
+          return Response.json({
+            success: false,
+            message: `CTFtime sync failed: ${e.message || String(e)}`,
+          }, { status: 500, headers: corsHeaders });
+        }
       }
 
       return new Response('Not Found', { status: 404, headers: corsHeaders });
@@ -190,8 +323,65 @@ export default {
   },
 
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
-    // TODO: Implement cron trigger execution matching GITHUB_USERNAME and CTFTIME_TEAM_ID
-    // Technical Reason: Cron workers and automated background tasks are out of scope for current milestone.
-    console.log("Cron execution triggered:", event.cron);
+    let db: ReturnType<typeof drizzle> | null = null;
+    if (env.DB) {
+      db = drizzle(env.DB, { schema });
+    }
+    if (!db) return;
+
+    const githubService = new GitHubService(
+      env.GITHUB_USERNAME || 'AzizPrayoga1',
+      env.GITHUB_TOKEN
+    );
+    const ctftimeService = new CTFtimeService(
+      env.CTFTIME_TEAM_ID || '426938'
+    );
+
+    ctx.waitUntil(
+      Promise.allSettled([
+        (async () => {
+          try {
+            const result = await githubService.syncRepositories(db!);
+            await db!.insert(schema.syncLogs).values({
+              source: 'github',
+              triggerType: 'cron',
+              status: 'success',
+              newItemsCount: result.newItemsCount + result.updatedItemsCount,
+              executedAt: new Date(),
+            });
+          } catch (e: any) {
+            await db!.insert(schema.syncLogs).values({
+              source: 'github',
+              triggerType: 'cron',
+              status: 'failed',
+              newItemsCount: 0,
+              errorMessage: e.message || String(e),
+              executedAt: new Date(),
+            });
+          }
+        })(),
+        (async () => {
+          try {
+            const result = await ctftimeService.syncAchievements(db!);
+            await db!.insert(schema.syncLogs).values({
+              source: 'ctftime',
+              triggerType: 'cron',
+              status: 'success',
+              newItemsCount: result.newAchievementsCount,
+              executedAt: new Date(),
+            });
+          } catch (e: any) {
+            await db!.insert(schema.syncLogs).values({
+              source: 'ctftime',
+              triggerType: 'cron',
+              status: 'failed',
+              newItemsCount: 0,
+              errorMessage: e.message || String(e),
+              executedAt: new Date(),
+            });
+          }
+        })()
+      ])
+    );
   }
 };

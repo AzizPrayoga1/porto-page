@@ -1,6 +1,6 @@
 export default function About() {
   const skills = {
-    languages: ['TypeScript', 'JavaScript', 'Python', 'Go', 'C/C++', 'SQL'],
+    languages: ['TypeScript', 'JavaScript', 'Python', 'SQL', 'C/C++'],
     frontend: ['React', 'Astro', 'TailwindCSS', 'HTML5/CSS3'],
     backend: ['Cloudflare Workers', 'Node.js', 'Express', 'Drizzle ORM', 'SQLite', 'PostgreSQL'],
     security: ['Web Exploitation', 'Reverse Engineering', 'Cryptography', 'Linux Forensics', 'OWASP Top 10']
@@ -31,25 +31,25 @@ export default function About() {
           <h3 className="text-xl font-bold mb-6">Skills & Technologies</h3>
           <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
             <div>
-              <h4 className="font-semibold text-emerald-600 dark:text-emerald-500 mb-3 text-sm uppercase tracking-wider">Languages</h4>
+              <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-3 text-sm uppercase tracking-wider">Languages</h4>
               <ul className="space-y-1.5 text-zinc-600 dark:text-zinc-400 text-sm">
                 {skills.languages.map(s => <li key={s}>{s}</li>)}
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-emerald-600 dark:text-emerald-500 mb-3 text-sm uppercase tracking-wider">Frontend</h4>
+              <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-3 text-sm uppercase tracking-wider">Frontend</h4>
               <ul className="space-y-1.5 text-zinc-600 dark:text-zinc-400 text-sm">
                 {skills.frontend.map(s => <li key={s}>{s}</li>)}
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-emerald-600 dark:text-emerald-500 mb-3 text-sm uppercase tracking-wider">Backend & Cloud</h4>
+              <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-3 text-sm uppercase tracking-wider">Backend & Cloud</h4>
               <ul className="space-y-1.5 text-zinc-600 dark:text-zinc-400 text-sm">
                 {skills.backend.map(s => <li key={s}>{s}</li>)}
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-emerald-600 dark:text-emerald-500 mb-3 text-sm uppercase tracking-wider">Security</h4>
+              <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-3 text-sm uppercase tracking-wider">Security</h4>
               <ul className="space-y-1.5 text-zinc-600 dark:text-zinc-400 text-sm">
                 {skills.security.map(s => <li key={s}>{s}</li>)}
               </ul>

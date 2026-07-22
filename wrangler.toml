@@ -3,8 +3,8 @@ main = "worker/index.ts"
 compatibility_date = "2026-07-22"
 
 [vars]
-GITHUB_USERNAME = "octocat"
-CTFTIME_TEAM_ID = "12345"
+GITHUB_USERNAME = "AzizPrayoga1"
+CTFTIME_TEAM_ID = "426938"
 
 [[d1_databases]]
 binding = "DB"
