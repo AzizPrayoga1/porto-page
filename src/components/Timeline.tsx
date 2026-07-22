@@ -134,7 +134,7 @@ export default function Timeline() {
           <motion.h2
             initial={{ opacity: 0, y: -20, filter: 'blur(4px)' }}
             whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            viewport={{ once: true, margin: '-100px' }}
+            viewport={{ once: false, margin: '-100px' }}
             transition={{ duration: 0.5 }}
             className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white"
           >
@@ -143,7 +143,7 @@ export default function Timeline() {
           <motion.div
             initial={{ width: 0 }}
             whileInView={{ width: '80px' }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             transition={{ delay: 0.3, duration: 0.5 }}
             className="h-1 bg-emerald-500 mx-auto mt-4 rounded-full"
           />
@@ -157,7 +157,7 @@ export default function Timeline() {
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: '-80px' }}
+            viewport={{ once: false, margin: '-80px' }}
             className="space-y-12 md:space-y-16"
           >
             {items.map((item, idx) => {

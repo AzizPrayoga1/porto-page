@@ -11,7 +11,7 @@ export default function Contact() {
         <motion.div
           initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
           whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          viewport={{ once: true, margin: '-100px' }}
+          viewport={{ once: false, margin: '-100px' }}
           transition={{ duration: 0.6, type: 'spring', stiffness: 80 }}
           className="space-y-6"
         >
@@ -29,7 +29,7 @@ export default function Contact() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             transition={{ delay: 0.2, duration: 0.5 }}
             className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 pt-4"
           >
