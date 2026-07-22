@@ -13,7 +13,7 @@ import AchievementCard from '../components/AchievementCard';
 // Degrades gracefully to empty array/mock on build-time
 const API_URL = 'http://localhost:8787';
 
-let stats = { projectsCount: 3, achievementsCount: 3, ctftimeGlobalRating: 2450.5, ctftimeGlobalRank: 124 };
+let stats = { projectsCount: 5, achievementsCount: 4, ctftimeGlobalRating: 145.63, ctftimeCountryRank: 10 };
 let projects = [];
 let achievements = [];
 
@@ -97,8 +97,8 @@ const ctfSnippet = achievements.length > 0 ? achievements.slice(0, 2) : [
         <h3 class="text-sm font-medium text-zinc-500 mt-2">GitHub Repositories</h3>
       </div>
       <div class="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-        <span class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-500">#{stats.ctftimeGlobalRank}</span>
-        <h3 class="text-sm font-medium text-zinc-500 mt-2">CTFtime Global Rank</h3>
+        <span class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-500">#{stats.ctftimeCountryRank}</span>
+        <h3 class="text-sm font-medium text-zinc-500 mt-2">CTFtime Country Rank</h3>
       </div>
       <div class="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
         <span class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-500">{Math.round(stats.ctftimeGlobalRating * 100) / 100}</span>

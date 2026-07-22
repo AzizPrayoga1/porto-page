@@ -12,42 +12,34 @@ export default function Timeline() {
     {
       id: 1,
       year: "2026",
-      title: "Google CTF 2026",
-      subtitle: "Cybersecurity Enthusiast / KuroCyber",
-      description: "Berhasil meraih Rank #42 berskala global bersama tim KuroCyber.",
+      title: "bhackari CTF 2026",
+      subtitle: "Cybersecurity Enthusiast / NVC",
+      description: "Berhasil meraih Rank #7 berskala global bersama tim NVC dengan perolehan 3692 poin.",
       type: "ctf"
     },
     {
       id: 2,
-      year: "2025 - Sekarang",
-      title: "Senior Fullstack Developer",
-      subtitle: "Software Company Inc.",
-      description: "Memimpin tim pengembangan sistem serverless modern berbasis Cloudflare Stack dan Go.",
-      type: "work"
-    },
-    {
-      id: 3,
-      year: "2024",
-      title: "DEF CON CTF 32 Quals",
-      subtitle: "KuroCyber Team Member",
-      description: "Menyelesaikan tantangan kategori Web Exploitation dan Reverse Engineering.",
+      year: "2026",
+      title: "squ1rrel CTF 2026",
+      subtitle: "Cybersecurity Enthusiast / NVC",
+      description: "Meraih Rank #21 berskala global bersama tim NVC.",
       type: "ctf"
     },
     {
-      id: 4,
-      year: "2022 - 2025",
-      title: "Software Engineer",
-      subtitle: "Startup Tech Labs",
-      description: "Membangun antarmuka web interaktif menggunakan React, Astro, dan TypeScript.",
+      id: 3,
+      year: "2025 - Sekarang",
+      title: "Fullstack Developer",
+      subtitle: "Freelance & Open Source Contributor",
+      description: "Mengembangkan aplikasi web berbasis TypeScript, React, dan database relational.",
       type: "work"
     },
     {
-      id: 5,
-      year: "2018 - 2022",
-      title: "Sarjana Ilmu Komputer",
-      subtitle: "Universitas Terkemuka",
-      description: "Lulus dengan fokus studi Rekayasa Perangkat Lunak & Kriptografi dasar.",
-      type: "education"
+      id: 4,
+      year: "2023",
+      title: "SPP Ukom SMK",
+      subtitle: "Developer",
+      description: "Membangun aplikasi manajemen pembayaran SPP sekolah menggunakan PHP (Laravel/Native) & MySQL.",
+      type: "work"
     }
   ];
 

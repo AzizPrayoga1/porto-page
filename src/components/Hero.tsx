@@ -71,7 +71,7 @@ export default function Hero() {
           variants={itemVariants}
           className="mt-6 text-sm sm:text-base md:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl sm:max-w-3xl leading-relaxed font-normal"
         >
-          Saya adalah Software Developer yang berfokus pada TypeScript & Go, serta Cybersecurity Enthusiast (CTF Player) dengan spesialisasi Web Exploitation & Reverse Engineering.
+          Saya adalah Software Developer yang berfokus pada TypeScript & JavaScript, serta Cybersecurity Enthusiast (CTF Player) dengan spesialisasi Web Exploitation & Reverse Engineering.
         </motion.p>
 
         {/* Buttons */}
