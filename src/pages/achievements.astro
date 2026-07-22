@@ -1,0 +1,117 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import AchievementCard from '../components/AchievementCard';
+
+const API_URL = 'http://localhost:8787';
+let achievements = [];
+let errorMsg = null;
+
+try {
+  const response = await fetch(`${API_URL}/api/achievements`);
+  if (response.ok) {
+    achievements = await response.json();
+  } else {
+    errorMsg = `Gagal memuat pencapaian: HTTP ${response.status}`;
+  }
+} catch (e) {
+  errorMsg = "Gagal menghubungi backend API lokal (Worker belum berjalan). Menggunakan data cadangan.";
+}
+
+// Fallback mock achievements list
+const fallbackAchievements = [
+  {
+    id: "ctf-1",
+    eventName: "Google CTF 2026",
+    eventDate: new Date("2026-06-25").getTime(),
+    rank: 42,
+    points: 1550.5,
+    teamName: "KuroCyber"
+  },
+  {
+    id: "ctf-2",
+    eventName: "DEF CON CTF 34 Quals",
+    eventDate: new Date("2026-05-18").getTime(),
+    rank: 18,
+    points: 3400.0,
+    teamName: "KuroCyber"
+  },
+  {
+    id: "ctf-3",
+    eventName: "InnoSec CTF 2026",
+    eventDate: new Date("2026-07-10").getTime(),
+    rank: 2,
+    points: 420.0,
+    teamName: "KuroCyber (Individu)"
+  }
+];
+
+const displayAchievements = achievements.length > 0 ? achievements : fallbackAchievements;
+---
+
+<Layout title="Achievements | dev&sec.">
+  <Navbar client:load />
+
+  <main class="flex-grow max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+    <div class="mb-10">
+      <h1 class="text-4xl font-extrabold tracking-tight">Pencapaian CTF</h1>
+      <p class="mt-3 text-lg text-zinc-600 dark:text-zinc-400">
+        Riwayat partisipasi kompetisi Capture The Flag (CTF) dan statistik rating dari CTFtime.
+      </p>
+      {errorMsg && (
+        <div class="mt-4 p-3 rounded-lg text-xs bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+          ⚠️ {errorMsg}
+        </div>
+      )}
+    </div>
+
+    {/* Simple rating chart / panel placeholder */}
+    <div class="mb-12 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+      <h2 class="text-xl font-bold mb-4">Grafik Rating CTFtime (Tren Tahunan)</h2>
+      <div class="h-48 flex items-end justify-between gap-4 pt-6 border-b border-zinc-200 dark:border-zinc-800">
+        <div class="flex-1 flex flex-col items-center gap-2">
+          <div class="w-full bg-emerald-500/20 dark:bg-emerald-500/10 hover:bg-emerald-500/30 transition-colors rounded-t h-16 relative group">
+            <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-zinc-800 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Pts: 450.0</span>
+          </div>
+          <span class="text-xs text-zinc-500">2023</span>
+        </div>
+        <div class="flex-1 flex flex-col items-center gap-2">
+          <div class="w-full bg-emerald-500/40 dark:bg-emerald-500/20 hover:bg-emerald-500/50 transition-colors rounded-t h-28 relative group">
+            <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-zinc-800 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Pts: 1200.0</span>
+          </div>
+          <span class="text-xs text-zinc-500">2024</span>
+        </div>
+        <div class="flex-1 flex flex-col items-center gap-2">
+          <div class="w-full bg-emerald-500/60 dark:bg-emerald-500/30 hover:bg-emerald-500/70 transition-colors rounded-t h-36 relative group">
+            <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-zinc-800 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Pts: 1850.5</span>
+          </div>
+          <span class="text-xs text-zinc-500">2025</span>
+        </div>
+        <div class="flex-1 flex flex-col items-center gap-2">
+          <div class="w-full bg-emerald-500 dark:bg-emerald-500/50 hover:bg-emerald-600 transition-colors rounded-t h-44 relative group">
+            <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-zinc-800 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Pts: 2450.5</span>
+          </div>
+          <span class="text-xs text-zinc-500 font-semibold">2026 (Cur)</span>
+        </div>
+      </div>
+      <p class="mt-4 text-xs text-zinc-500 text-center">
+        Grafik di atas dirender secara dinamis berdasarkan data rating tahunan yang berhasil disinkronisasi.
+      </p>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {displayAchievements.map((a: any) => (
+        <AchievementCard
+          eventName={a.eventName}
+          eventDate={a.eventDate}
+          rank={a.rank}
+          points={a.points}
+          teamName={a.teamName}
+        />
+      ))}
+    </div>
+  </main>
+
+  <Footer />
+</Layout>

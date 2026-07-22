@@ -1,0 +1,19 @@
+name = "portfolio-backend"
+main = "worker/index.ts"
+compatibility_date = "2026-07-22"
+
+[vars]
+GITHUB_USERNAME = "octocat"
+CTFTIME_TEAM_ID = "12345"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "portfolio-db"
+database_id = "xxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+migrations_dir = "drizzle/migrations"
+
+[triggers]
+crons = [
+  "0 0 1 * *",  # Monthly (GitHub)
+  "0 0 * * 1"   # Weekly (CTFtime)
+]

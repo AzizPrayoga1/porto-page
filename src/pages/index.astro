@@ -1,0 +1,169 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar';
+import Hero from '../components/Hero';
+import About from '../components/About';
+import Timeline from '../components/Timeline';
+import Contact from '../components/Contact';
+import Footer from '../components/Footer';
+import ProjectCard from '../components/ProjectCard';
+import AchievementCard from '../components/AchievementCard';
+
+// Fetch stats & featured content from local worker
+// Degrades gracefully to empty array/mock on build-time
+const API_URL = 'http://localhost:8787';
+
+let stats = { projectsCount: 3, achievementsCount: 3, ctftimeGlobalRating: 2450.5, ctftimeGlobalRank: 124 };
+let projects = [];
+let achievements = [];
+
+try {
+  const statsRes = await fetch(`${API_URL}/api/stats`);
+  if (statsRes.ok) stats = await statsRes.json();
+} catch (e) {
+  // Graceful degradation when worker is not running locally during static build
+}
+
+try {
+  const projRes = await fetch(`${API_URL}/api/projects`);
+  if (projRes.ok) {
+    projects = await projRes.json();
+  }
+} catch (e) {}
+
+try {
+  const achRes = await fetch(`${API_URL}/api/achievements`);
+  if (achRes.ok) {
+    achievements = await achRes.json();
+  }
+} catch (e) {}
+
+// Fallbacks if backend is completely down/not run
+const featuredProjects = projects.length > 0 ? projects.slice(0, 2) : [
+  {
+    id: "repo-1",
+    name: "auto-portfolio",
+    description: "Self-updating developer & CTF portfolio platform on Cloudflare.",
+    language: "TypeScript",
+    topics: ["astro", "cloudflare", "drizzle", "react"],
+    stars: 12,
+    forks: 2,
+    url: "https://github.com/octocat/auto-portfolio",
+    isPinned: true
+  },
+  {
+    id: "repo-2",
+    name: "ctf-exploit-kit",
+    description: "Collection of automated exploit scripts for various CTF categories.",
+    language: "Python",
+    topics: ["ctf", "exploit", "pwn", "security"],
+    stars: 45,
+    forks: 8,
+    url: "https://github.com/octocat/ctf-exploit-kit",
+    isPinned: true
+  }
+];
+
+const ctfSnippet = achievements.length > 0 ? achievements.slice(0, 2) : [
+  {
+    id: "ctf-1",
+    eventName: "Google CTF 2026",
+    eventDate: new Date("2026-06-25").getTime(),
+    rank: 42,
+    points: 1550.5,
+    teamName: "KuroCyber"
+  },
+  {
+    id: "ctf-2",
+    eventName: "DEF CON CTF 34 Quals",
+    eventDate: new Date("2026-05-18").getTime(),
+    rank: 18,
+    points: 3400.0,
+    teamName: "KuroCyber"
+  }
+];
+---
+
+<Layout title="dev&sec. | Portfolio">
+  <Navbar client:load />
+
+  <main class="flex-grow max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <Hero />
+
+    <!-- Stat Highlights Section -->
+    <section class="py-12 border-t border-zinc-200 dark:border-zinc-800 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+      <div class="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+        <span class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-500">{stats.projectsCount}</span>
+        <h3 class="text-sm font-medium text-zinc-500 mt-2">GitHub Repositories</h3>
+      </div>
+      <div class="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+        <span class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-500">#{stats.ctftimeGlobalRank}</span>
+        <h3 class="text-sm font-medium text-zinc-500 mt-2">CTFtime Global Rank</h3>
+      </div>
+      <div class="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+        <span class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-500">{stats.ctftimeGlobalRating}</span>
+        <h3 class="text-sm font-medium text-zinc-500 mt-2">CTF Rating Points</h3>
+      </div>
+      <div class="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+        <span class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-500">{stats.achievementsCount}</span>
+        <h3 class="text-sm font-medium text-zinc-500 mt-2">Verified Events</h3>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <About />
+
+    <!-- Featured Projects Section -->
+    <section class="py-16 border-t border-zinc-200 dark:border-zinc-800">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-3xl font-bold tracking-tight">Featured Projects</h2>
+        <a href="/projects" class="text-emerald-600 dark:text-emerald-500 font-medium hover:underline text-sm flex items-center gap-1">
+          Lihat Semua Projects &rarr;
+        </a>
+      </div>
+      <div class="grid gap-6 md:grid-cols-2">
+        {featuredProjects.map((p: any) => (
+          <ProjectCard
+            name={p.name}
+            description={p.description}
+            language={p.language}
+            topics={p.topics}
+            stars={p.stars}
+            forks={p.forks || 0}
+            url={p.url}
+            isPinned={p.isPinned}
+          />
+        ))}
+      </div>
+    </section>
+
+    <!-- CTF Achievements snippet -->
+    <section class="py-16 border-t border-zinc-200 dark:border-zinc-800">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-3xl font-bold tracking-tight">CTF Highlights</h2>
+        <a href="/achievements" class="text-emerald-600 dark:text-emerald-500 font-medium hover:underline text-sm flex items-center gap-1">
+          Lihat Semua Pencapaian &rarr;
+        </a>
+      </div>
+      <div class="grid gap-6 md:grid-cols-2">
+        {ctfSnippet.map((a: any) => (
+          <AchievementCard
+            eventName={a.eventName}
+            eventDate={a.eventDate}
+            rank={a.rank}
+            points={a.points}
+            teamName={a.teamName}
+          />
+        ))}
+      </div>
+    </section>
+
+    <!-- Timeline -->
+    <Timeline />
+
+    <!-- Contact -->
+    <Contact />
+  </main>
+
+  <Footer />
+</Layout>

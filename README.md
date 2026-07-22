@@ -1,126 +1,174 @@
-# Automated Personal Portfolio Website
+# Automated Personal Portfolio Website (50% Milestone)
 
-Self-updating personal portfolio for a software developer and CTF player. The goal is to keep projects, open-source activity, and CTF achievements fresh without routine manual editing.
+Platform portofolio pribadi otomatis (self-updating) yang dirancang untuk Software Developer & Cybersecurity Enthusiast (CTF Player). Proyek ini dibangun di atas infrastruktur Cloudflare (Pages & Workers) dengan performa tinggi dan biaya operasional $0 (free tier).
 
-This repository currently starts from the product requirements document:
+Cakupan pekerjaan pada repositori ini adalah 50% dari total proyek, difokuskan pada fondasi arsitektur, konfigurasi proyek, skema database, mock API, dan layout halaman utama beserta komponen visual yang dapat digunakan kembali.
 
-- [PRD_Automated_Portfolio_Website.md](PRD_Automated_Portfolio_Website.md)
+## Tech Stack
+- **Frontend**: [Astro](https://astro.build/) (Static Site / SSR) + [TypeScript](https://www.typescriptlang.org/)
+- **Style**: [TailwindCSS](https://tailwindcss.com/)
+- **UI Components**: React Components (ThemeToggle, Cards, Layouts)
+- **Backend API**: [Cloudflare Workers](https://workers.cloudflare.com/)
+- **Database**: [Cloudflare D1](https://developers.cloudflare.com/d1/) (SQLite Edge Database)
+- **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
 
-## Product Vision
+---
 
-Most personal portfolios become outdated quickly. This project is designed as a portfolio that syncs activity from external sources, stores the latest verified data, and renders a fast public website from cached database content.
+## Struktur Folder Proyek
+```
+D:\project libur\proto page\
+├── drizzle/                     # File migrasi database SQL Drizzle
+│   └── migrations/
+├── src/                         # Kode sumber Frontend (Astro + React)
+│   ├── components/              # Komponen UI reusable (Hero, About, Cards, dsb)
+│   │   ├── ThemeToggle.tsx
+│   │   ├── ProjectCard.tsx
+│   │   └── AchievementCard.tsx
+│   │   ├── Navbar.tsx
+│   │   ├── Footer.tsx
+│   │   ├── Hero.tsx
+│   │   ├── About.tsx
+│   │   ├── Timeline.tsx
+│   │   └── Contact.tsx
+│   ├── db/                      # Definisi skema database Drizzle ORM
+│   │   └── schema.ts
+│   ├── layouts/                 # Master Layout Astro (Theme detection, styles)
+│   │   └── Layout.astro
+│   ├── lib/                     # Modul core (API Client, Logger wrapper)
+│   │   ├── api.ts
+│   │   └── logger.ts
+│   ├── pages/                   # Astro Pages & Routing (/projects, /achievements, dsb)
+│   │   ├── index.astro
+│   │   ├── projects.astro
+│   │   ├── achievements.astro
+│   │   ├── about.astro
+│   │   └── 404.astro
+│   ├── services/                # Skeleton layanan integrasi API eksternal
+│   │   ├── github.ts
+│   │   └── ctftime.ts
+│   ├── styles/                  # File styling CSS global Tailwind
+│   │   └── global.css
+│   ├── types/                   # Definisi Type & Interface TypeScript global
+│   │   └── index.ts
+│   ├── utils/                   # Fungsi utilitas (Date formatter)
+│   │   └── date.ts
+│   └── env.d.ts
+├── worker/                      # Kode sumber Backend (Cloudflare Worker API)
+│   └── index.ts
+├── drizzle.config.ts            # Konfigurasi Drizzle ORM
+├── env.example                  # Contoh file environment
+├── package.json                 # Node.js dependencies & scripts
+├── tailwind.config.mjs          # Konfigurasi TailwindCSS
+├── tsconfig.json                # Konfigurasi compiler TypeScript
+└── wrangler.toml                # Konfigurasi Cloudflare Workers & D1 Bindings
+```
 
-The website should communicate two professional identities clearly:
+---
 
-- Software developer: public GitHub projects, pinned repositories, tech stack, stars, forks, and recent activity.
-- Cybersecurity enthusiast / CTF player: CTFtime rating history, event participation, ranks, points, and writeups where available.
+## Pengembangan Lokal & Cara Menjalankan
 
-## Core Objectives
+### Prasyarat
+- [Node.js](https://nodejs.org/) v18 atau versi lebih baru.
+- Wrangler CLI terinstall (opsional global, sudah disediakan lokal lewat `devDependencies`):
+  ```bash
+  npm install -g wrangler
+  ```
 
-- Keep portfolio data updated automatically with minimal manual maintenance.
-- Stay cheap to operate, ideally within free tiers.
-- Give the owner full control over what appears publicly.
-- Make technical credibility easy to verify for recruiters, teammates, and CTF peers.
-- Degrade gracefully when GitHub or CTFtime is unavailable.
+### 1. Instalasi Proyek
+Kloning repositori ini dan pasang seluruh dependensi:
+```bash
+npm install
+```
 
-## Planned Features
+### 2. Migrasi Database Lokal (D1 Drizzle)
+Jalankan perintah berikut untuk menerapkan migrasi skema database SQLite lokal di dalam direktori state Wrangler:
+```bash
+# Generate file SQL migrasi dari skema TS
+npm run db:generate
 
-### Public Website
+# Terapkan migrasi ke database D1 lokal
+npm run db:migrate:local
+```
 
-- Home page with concise professional profile.
-- Projects page powered by synced GitHub repository data.
-- Achievements page powered by synced CTFtime data.
-- Fast mobile-friendly layout.
-- No direct calls from public pages to GitHub or CTFtime.
+### 3. Menjalankan Backend API lokal
+Jalankan Cloudflare Workers lokal menggunakan Wrangler Dev:
+```bash
+npm run dev:backend
+```
+Backend API akan berjalan pada `http://localhost:8787` dengan endpoint:
+- `GET /api/projects` - Mengembalikan daftar proyek (D1 database / fallback Mock).
+- `GET /api/achievements` - Mengembalikan daftar pencapaian CTF (D1 database / fallback Mock).
+- `GET /api/stats` - Mengembalikan total ringkasan statistik portofolio.
+- `POST /api/sync/github` - Placeholder trigger sinkronisasi GitHub.
+- `POST /api/sync/ctftime` - Placeholder trigger sinkronisasi CTFtime.
 
-### GitHub Automation
+### 4. Menjalankan Frontend Astro
+Jalankan environment Astro lokal di terminal terpisah:
+```bash
+npm run dev:frontend
+```
+Buka `http://localhost:4321` pada browser untuk melihat portofolio Anda. Halaman web akan membaca data dari API backend lokal secara asinkron atau menggunakan cadangan mock jika backend belum menyala.
 
-- Monthly scheduled sync.
-- Fetch public repositories and pinned repositories.
-- Store repository metadata such as name, description, language, topics, stars, forks, URL, and last push time.
-- Filter private repositories and low-signal forks.
-- Support admin-controlled publishing behavior.
+---
 
-### CTFtime Automation
+## Deployment ke Cloudflare
 
-- Weekly scheduled sync.
-- Fetch team or profile data from available CTFtime endpoints and public pages.
-- Store event participation, rank, points, and rating snapshots.
-- Preserve last known good data if CTFtime parsing fails.
+### 1. Login ke Cloudflare Account
+```bash
+wrangler login
+```
 
-### Admin Dashboard
+### 2. Membuat Database Cloudflare D1
+Buat database D1 baru melalui terminal:
+```bash
+wrangler d1 create portfolio-db
+```
+Salin output `database_id` dari terminal lalu sesuaikan nilai `database_id` di dalam file `wrangler.toml`.
 
-- Protected owner-only dashboard.
-- Manual sync buttons for GitHub and CTFtime.
-- Show/hide controls for synced projects and events.
-- Sync logs with status, timestamps, item counts, and error details.
-- Lightweight manual notes for adding context to synced items.
+### 3. Terapkan Migrasi ke Database Cloudflare D1 Remote
+```bash
+npm run db:migrate:remote
+```
 
-## Target Architecture
+### 4. Menyimpan API Token (Secrets) ke Cloudflare Workers
+Masukkan secret key GitHub API secara aman:
+```bash
+wrangler secret put GITHUB_TOKEN
+```
 
-The proposed stack is optimized for a low-cost personal project:
+### 5. Deploy Backend Workers
+```bash
+npm run deploy:backend
+```
 
-| Layer | Proposed Tooling |
-|---|---|
-| Frontend hosting | Cloudflare Pages |
-| Compute and cron | Cloudflare Workers |
-| Database | Cloudflare D1 |
-| Optional object storage | Cloudflare R2 |
-| Admin authentication | Cloudflare Access |
-| Secrets | Wrangler Secrets |
-| Monitoring | Workers logs and optional webhook alerts |
+### 6. Deploy Frontend ke Cloudflare Pages
+1. Masuk ke dashboard Cloudflare > **Workers & Pages** > **Create application** > **Pages** > Hubungkan dengan repositori GitHub Anda.
+2. Konfigurasi build:
+   - **Framework preset**: `Astro`
+   - **Build command**: `npm run build:frontend`
+   - **Build output directory**: `dist`
+3. Tekan **Save and Deploy**.
 
-Data flow:
+---
 
-1. Cloudflare Cron triggers scheduled sync workers.
-2. Workers fetch GitHub and CTFtime data.
-3. Workers diff and upsert records into D1.
-4. Public pages render from stored data.
-5. Admin dashboard controls visibility, manual sync, and sync review.
+## Rincian Implementasi & Status Fitur (50% Scope)
 
-## Data Model Draft
+### Komponen Reusable (`src/components/`):
+- `ThemeToggle`: React component menggunakan localStorage dan manipulasi kelas `dark` pada dokumen HTML untuk pergantian tema responsif bebas FOUC.
+- `Navbar` & `Footer`: Bar navigasi dan footer responsif dengan link menu dinamis.
+- `Hero`: Header interaktif yang memadukan identitas Developer & CTF player.
+- `About`: Menampilkan perkenalan diri dan visualisasi tech stack yang dikelompokkan secara terstruktur.
+- `ProjectCard`: Card repositori menampilkan nama, deskripsi, bahasa, bintang, fork, topik, dan link langsung ke GitHub.
+- `AchievementCard`: Card event menampilkan nama event, tanggal, peringkat, poin, dan nama tim yang disinkronkan.
+- `Timeline`: Alur perjalanan karir profesional, akademis, dan turnamen CTF.
+- `Contact`: Tombol penghubung surat elektronik dan akun sosial media.
 
-Initial database entities:
+### API Endpoints (`worker/index.ts`):
+- Rute-rute API dikonfigurasi dengan headers CORS lengkap agar dapat dikonsumsi dengan aman oleh domain frontend.
+- Integrasi Drizzle ORM telah disiapkan untuk melakukan query data dari database Cloudflare D1 saat tabel telah terisi.
 
-- `projects`: GitHub repository records.
-- `ctf_achievements`: CTF event participation records.
-- `ctf_rating_history`: historical CTFtime rating snapshots.
-- `sync_logs`: cron and manual sync execution logs.
-
-The detailed draft schema is documented in the PRD.
-
-## Non-Functional Goals
-
-- Public page TTFB target below 200 ms.
-- Lighthouse performance target of 90 or higher.
-- Idempotent sync jobs with no duplicate records.
-- Graceful failure when external APIs are down.
-- GitHub tokens and credentials stored only as platform secrets.
-- Admin endpoints protected by proper authentication and rate limiting.
-
-## Repository Status
-
-This is the initial product planning stage. Implementation has not started yet.
-
-Recommended first implementation milestones:
-
-1. Choose frontend framework: Astro or Next.js.
-2. Scaffold Cloudflare Pages and Workers structure.
-3. Add D1 schema and migrations.
-4. Implement GitHub sync worker.
-5. Implement public Projects page.
-6. Implement CTFtime sync worker.
-7. Add admin dashboard and sync logs.
-8. Add deployment and operational documentation.
-
-## Security Notes
-
-- Do not commit API tokens, admin credentials, cookies, or secrets.
-- Store GitHub tokens through `wrangler secret put`.
-- Protect admin paths with Cloudflare Access or equivalent authentication.
-- Add rate limiting to manual sync endpoints.
-- Keep synced data immutable by default and use soft-hide behavior for moderation.
-
-## License
-
-License has not been selected yet.
+### Penanganan Fitur Masa Depan (TODOs):
+Beberapa modul telah disiapkan sebagai antarmuka skeleton dengan tanda komentar `TODO:` dan alasan teknis mengapa implementasi lanjutan ditunda hingga fase berikutnya:
+1. **GitHub API integration** (`src/services/github.ts`): Membutuhkan modul GraphQL client dan otentikasi token untuk membaca pinnedItems.
+2. **CTFtime scraping engine** (`src/services/ctftime.ts`): Memerlukan modul parser HTML untuk menarik peringkat tim karena keterbatasan API resmi JSON CTFtime.
+3. **Automated Cron Jobs** (`worker/index.ts`): Memerlukan Cloudflare Cron Trigger untuk sinkronisasi terjadwal di latar belakang.
