@@ -134,7 +134,7 @@ export default function Timeline() {
           <motion.h2
             initial={{ opacity: 0, y: -20, filter: 'blur(4px)' }}
             whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            viewport={{ once: false, margin: '-100px' }}
+            viewport={{ once: false, margin: '-30px' }}
             transition={{ duration: 0.5 }}
             className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white"
           >
@@ -153,13 +153,7 @@ export default function Timeline() {
           {/* Central Line */}
           <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-[2px] bg-gradient-to-b from-emerald-500 via-blue-500 to-zinc-200 dark:to-zinc-800 transform md:-translate-x-1/2 rounded-full" />
 
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: false, margin: '-80px' }}
-            className="space-y-12 md:space-y-16"
-          >
+          <div className="space-y-12 md:space-y-16">
             {items.map((item, idx) => {
               const colors = getTypeColors(item.type);
               const isEven = idx % 2 === 0;
@@ -168,6 +162,9 @@ export default function Timeline() {
                 <motion.div
                   key={item.id}
                   variants={itemVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: false, margin: '-40px' }}
                   className={`flex flex-col md:flex-row items-stretch w-full relative ${
                     isEven ? 'md:flex-row-reverse' : ''
                   }`}
@@ -220,7 +217,7 @@ export default function Timeline() {
                 </motion.div>
               );
             })}
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
