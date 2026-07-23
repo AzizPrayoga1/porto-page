@@ -11,10 +11,10 @@ import AchievementCard from '../components/AchievementCard';
 import { drizzle } from 'drizzle-orm/d1';
 import * as schema from '../db/schema';
 import { eq } from 'drizzle-orm';
+import { env } from 'cloudflare:workers'; // Import resmi Cloudflare Workers binding
 
-// Query D1 directly via Cloudflare runtime binding (SSR)
-const runtime = Astro.locals.runtime;
-const db = runtime?.env?.DB ? drizzle(runtime.env.DB, { schema }) : null;
+// Query D1 langsung via binding `env`
+const db = env?.DB ? drizzle(env.DB, { schema }) : null;
 
 let stats = { projectsCount: 5, achievementsCount: 4, ctftimeGlobalRating: 145.63, ctftimeCountryRank: 10 };
 let projects: any[] = [];
@@ -37,11 +37,11 @@ if (db) {
       ctftimeCountryRank: latest?.countryRank ?? 10,
     };
   } catch (e) {
-    // Graceful degradation — use defaults above
+    // Graceful degradation — gunakan fallback di bawah jika DB belum di-migrate
   }
 }
 
-// Fallbacks if DB empty / not connected
+// Fallbacks jika DB masih kosong / belum tersambung
 const featuredProjects = projects.length > 0 ? projects.slice(0, 2) : [
   {
     id: "repo-1",
@@ -86,7 +86,7 @@ const ctfSnippet = achievements.length > 0 ? achievements.slice(0, 2) : [
   }
 ];
 
-const GITHUB_USERNAME = import.meta.env.GITHUB_USERNAME || 'AzizPrayoga1';
+const GITHUB_USERNAME = env?.GITHUB_USERNAME || import.meta.env.GITHUB_USERNAME || 'AzizPrayoga1';
 ---
 
 <Layout title="dev&sec. | Portfolio">
