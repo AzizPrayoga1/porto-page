@@ -3,7 +3,7 @@ import { drizzle } from 'drizzle-orm/d1';
 import * as schema from '../../db/schema';
 import { env } from 'cloudflare:workers';
 
-export const prerender = false; // Wajib Server-Side Render (SSR)
+export const prerender = false;
 
 export const GET: APIRoute = async () => {
   try {
@@ -30,27 +30,30 @@ export const GET: APIRoute = async () => {
     if (ghRes.ok) {
       const repos: any[] = await ghRes.json();
       for (const repo of repos) {
-        if (repo.fork) continue; // Lewati repo hasil fork
+        if (repo.fork) continue;
+
+        const isPinnedVal = Boolean(repo.stargazers_count > 0 || repo.name === 'porto-page');
+        const topicsJson = JSON.stringify(Array.isArray(repo.topics) ? repo.topics : []);
 
         await db.insert(schema.projects).values({
           id: String(repo.id),
-          name: repo.name,
-          description: repo.description || 'No description provided.',
-          language: repo.language || 'Code',
-          topics: JSON.stringify(repo.topics || []),
-          stars: repo.stargazers_count || 0,
-          forks: repo.forks_count || 0,
-          url: repo.html_url,
-          isPinned: repo.stargazers_count > 0 || repo.name === 'porto-page',
-          isHidden: false
+          name: String(repo.name),
+          description: String(repo.description || 'No description provided.'),
+          language: String(repo.language || 'Code'),
+          topics: topicsJson,
+          stars: Number(repo.stargazers_count || 0),
+          forks: Number(repo.forks_count || 0),
+          url: String(repo.html_url),
+          isPinned: isPinnedVal as any,
+          isHidden: false as any
         }).onConflictDoUpdate({
           target: schema.projects.id,
           set: {
-            description: repo.description || 'No description provided.',
-            stars: repo.stargazers_count || 0,
-            forks: repo.forks_count || 0,
-            language: repo.language || 'Code',
-            topics: JSON.stringify(repo.topics || []),
+            description: String(repo.description || 'No description provided.'),
+            stars: Number(repo.stargazers_count || 0),
+            forks: Number(repo.forks_count || 0),
+            language: String(repo.language || 'Code'),
+            topics: topicsJson,
           }
         });
         results.github++;
@@ -68,23 +71,25 @@ export const GET: APIRoute = async () => {
       const ctfData: any = await ctfRes.json();
       const rating = ctfData.rating;
 
-      if (rating) {
+      if (rating && typeof rating === 'object') {
         for (const yearStr of Object.keys(rating)) {
           const yearData = rating[yearStr];
           const yearNum = parseInt(yearStr, 10);
 
+          if (isNaN(yearNum)) continue;
+
           await db.insert(schema.ctfRatingHistory).values({
             id: `ctf-${teamId}-${yearNum}`,
             year: yearNum,
-            ratingPoints: yearData.rating_points || 0,
-            countryRank: yearData.country_place || 0,
-            globalRank: yearData.organizer_place || yearData.rating_place || 0,
+            ratingPoints: Number(yearData.rating_points || 0),
+            countryRank: Number(yearData.country_place || 0),
+            globalRank: Number(yearData.organizer_place || yearData.rating_place || 0),
           }).onConflictDoUpdate({
             target: schema.ctfRatingHistory.id,
             set: {
-              ratingPoints: yearData.rating_points || 0,
-              countryRank: yearData.country_place || 0,
-              globalRank: yearData.organizer_place || yearData.rating_place || 0,
+              ratingPoints: Number(yearData.rating_points || 0),
+              countryRank: Number(yearData.country_place || 0),
+              globalRank: Number(yearData.organizer_place || yearData.rating_place || 0),
             }
           });
           results.ctfHistory++;
@@ -104,7 +109,7 @@ export const GET: APIRoute = async () => {
   } catch (error: any) {
     return new Response(JSON.stringify({
       status: 'error',
-      message: error.message
+      message: error.message || 'Unknown database error'
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
