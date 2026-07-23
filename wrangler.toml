@@ -9,7 +9,7 @@ CTFTIME_TEAM_ID = "426938"
 [[d1_databases]]
 binding = "DB"
 database_name = "portfolio-db"
-database_id = "xxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+database_id = "c2e5918d-adaf-437b-9040-8e8e848fb9ee"
 migrations_dir = "drizzle/migrations"
 
 [triggers]
