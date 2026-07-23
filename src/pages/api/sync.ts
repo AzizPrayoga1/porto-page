@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { drizzle } from 'drizzle-orm/d1';
 import * as schema from '../../db/schema';
+import { eq } from 'drizzle-orm';
 import { env } from 'cloudflare:workers';
 
 export const prerender = false;
@@ -49,8 +50,9 @@ export const GET: APIRoute = async () => {
             stars: Number(repo.stargazers_count || 0),
             forks: Number(repo.forks_count || 0),
             url: String(repo.html_url || ''),
-            isPinned: isPinnedVal as any,
-            isHidden: false as any
+            isPinned: isPinnedVal,
+            isHidden: false,
+            lastSyncedAt: new Date()
           }).onConflictDoUpdate({
             target: schema.projects.id,
             set: {
@@ -59,7 +61,8 @@ export const GET: APIRoute = async () => {
               forks: Number(repo.forks_count || 0),
               language: String(repo.language || 'Code'),
               topics: topicsStr,
-              isPinned: isPinnedVal as any
+              isPinned: isPinnedVal,
+              lastSyncedAt: new Date()
             }
           });
           results.github++;
@@ -93,22 +96,32 @@ export const GET: APIRoute = async () => {
 
             const pts = Number(yearData.rating_points || 0);
             const countryRank = Number(yearData.country_place || 0);
-            const globalRank = Number(yearData.rating_place || yearData.organizer_place || 0);
 
-            await db.insert(schema.ctfRatingHistory).values({
-              id: `ctf-${teamId}-${yearNum}`,
-              year: yearNum,
-              ratingPoints: pts,
-              countryRank: countryRank,
-              globalRank: globalRank
-            }).onConflictDoUpdate({
-              target: schema.ctfRatingHistory.id,
-              set: {
+            // Cek apakah data tahun ini sudah ada di DB
+            const existing = await db
+              .select()
+              .from(schema.ctfRatingHistory)
+              .where(eq(schema.ctfRatingHistory.year, yearNum));
+
+            if (existing.length > 0) {
+              // Update jika sudah ada
+              await db
+                .update(schema.ctfRatingHistory)
+                .set({
+                  ratingPoints: pts,
+                  countryRank: countryRank,
+                  recordedAt: new Date()
+                })
+                .where(eq(schema.ctfRatingHistory.year, yearNum));
+            } else {
+              // Insert baru (biarkan id auto-increment oleh D1)
+              await db.insert(schema.ctfRatingHistory).values({
+                year: yearNum,
                 ratingPoints: pts,
                 countryRank: countryRank,
-                globalRank: globalRank
-              }
-            });
+                recordedAt: new Date()
+              });
+            }
             results.ctfHistory++;
           }
         }
@@ -125,11 +138,12 @@ export const GET: APIRoute = async () => {
         {
           id: 'evt-nahamcon-2026',
           eventName: 'NahamCon CTF 2026',
-          eventDate: new Date('2026-05-02'), // Menggunakan JS Date Object
+          eventDate: new Date('2026-05-02'),
           rank: 25,
           points: 1250.0,
           teamName: 'KuroCyber',
-          isHidden: false
+          isHidden: false,
+          lastSyncedAt: new Date()
         },
         {
           id: 'evt-umd-2026',
@@ -138,14 +152,19 @@ export const GET: APIRoute = async () => {
           rank: 12,
           points: 2100.0,
           teamName: 'KuroCyber',
-          isHidden: false
+          isHidden: false,
+          lastSyncedAt: new Date()
         }
       ];
 
       for (const evt of initialEvents) {
-        await db.insert(schema.ctfAchievements).values(evt as any).onConflictDoUpdate({
+        await db.insert(schema.ctfAchievements).values(evt).onConflictDoUpdate({
           target: schema.ctfAchievements.id,
-          set: { rank: evt.rank, points: evt.points }
+          set: {
+            rank: evt.rank,
+            points: evt.points,
+            lastSyncedAt: new Date()
+          }
         });
         results.ctfEvents++;
       }
