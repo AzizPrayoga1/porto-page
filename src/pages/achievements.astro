@@ -1,4 +1,3 @@
-import { env } from 'cloudflare:workers';
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar';
@@ -6,54 +5,19 @@ import Footer from '../components/Footer';
 import AchievementCard from '../components/AchievementCard';
 import { drizzle } from 'drizzle-orm/d1';
 import * as schema from '../db/schema';
-import { eq } from 'drizzle-orm';
+import { env } from 'cloudflare:workers';
 
-
-const db = runtime?.env?.DB ? drizzle(runtime.env.DB, { schema }) : null;
+const db = env?.DB ? drizzle(env.DB, { schema }) : null;
 
 let achievements: any[] = [];
-let ratingHistory: any[] = [];
-
 if (db) {
   try {
-    const [ctfList, ratingList] = await Promise.all([
-      db.select().from(schema.ctfAchievements).where(eq(schema.ctfAchievements.isHidden, false)),
-      db.select().from(schema.ctfRatingHistory).orderBy(schema.ctfRatingHistory.year),
-    ]);
-    achievements = ctfList;
-    ratingHistory = ratingList.filter((r: any) => r.ratingPoints > 0);
-  } catch (e) {}
-}
-
-// Fallback mock achievements list
-const fallbackAchievements = [
-  {
-    id: "ctf-1",
-    eventName: "Google CTF 2026",
-    eventDate: new Date("2026-06-25").getTime(),
-    rank: 42,
-    points: 1550.5,
-    teamName: "KuroCyber"
-  },
-  {
-    id: "ctf-2",
-    eventName: "DEF CON CTF 34 Quals",
-    eventDate: new Date("2026-05-18").getTime(),
-    rank: 18,
-    points: 3400.0,
-    teamName: "KuroCyber"
-  },
-  {
-    id: "ctf-3",
-    eventName: "InnoSec CTF 2026",
-    eventDate: new Date("2026-07-10").getTime(),
-    rank: 2,
-    points: 420.0,
-    teamName: "KuroCyber (Individu)"
+    achievements = await db.select().from(schema.ctfAchievements);
+  } catch (e) {
+    // Fallback jika database kosong / belum di-migrate
   }
-];
-
-const displayAchievements = achievements.length > 0 ? achievements : fallbackAchievements;
+}
+---
 ---
 
 <Layout title="Achievements | dev&sec.">
