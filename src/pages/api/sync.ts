@@ -16,6 +16,9 @@ export const GET: APIRoute = async () => {
     const teamId = env.CTFTIME_TEAM_ID || '426938';
     const token = env.GITHUB_TOKEN;
 
+    // Nama Tim diset ke NVC secara default
+    let activeTeamName = 'NVC';
+
     const results = { github: 0, ctfHistory: 0, ctfEvents: 0 };
 
     // ==========================================
@@ -86,6 +89,12 @@ export const GET: APIRoute = async () => {
 
       if (ctfRes.ok) {
         const ctfData: any = await ctfRes.json();
+        
+        // Ambil nama tim otomatis dari CTFtime jika ada
+        if (ctfData.name) {
+          activeTeamName = String(ctfData.name);
+        }
+
         const rating = ctfData.rating;
 
         if (rating && typeof rating === 'object') {
@@ -146,7 +155,7 @@ export const GET: APIRoute = async () => {
           const eventItem = results2026[eventIdStr];
           const scores = eventItem.scores || [];
           
-          // Cari skor tim KuroCyber / Team ID
+          // Cari skor berdasarkan Team ID di CTFtime
           const teamScore = scores.find((s: any) => String(s.team_id) === String(teamId));
           if (teamScore) {
             await db.insert(schema.ctfAchievements).values({
@@ -155,7 +164,7 @@ export const GET: APIRoute = async () => {
               eventDate: new Date(),
               rank: Number(teamScore.place || 0),
               points: Number(teamScore.points || 0),
-              teamName: 'KuroCyber',
+              teamName: activeTeamName,
               isHidden: false,
               lastSyncedAt: new Date()
             }).onConflictDoUpdate({
@@ -163,6 +172,7 @@ export const GET: APIRoute = async () => {
               set: {
                 rank: Number(teamScore.place || 0),
                 points: Number(teamScore.points || 0),
+                teamName: activeTeamName,
                 lastSyncedAt: new Date()
               }
             });
@@ -177,6 +187,7 @@ export const GET: APIRoute = async () => {
     return new Response(JSON.stringify({
       status: errors.length > 0 ? 'partial_error' : 'success',
       message: 'Proses sinkronisasi selesai!',
+      teamName: activeTeamName,
       synced: results,
       errors: errors.length > 0 ? errors : undefined,
       debug: debugLog
