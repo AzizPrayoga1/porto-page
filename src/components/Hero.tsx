@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-export default function Hero() {
+export default function Hero({ username = "AzizPrayoga1" }: { username?: string }) {
   const containerVariants = {
     hidden: {},
     visible: {
@@ -46,6 +46,25 @@ export default function Hero() {
         animate="visible"
         className="max-w-5xl mx-auto flex flex-col items-center justify-center"
       >
+        {/* Avatar */}
+        <motion.div
+          variants={itemVariants}
+          className="relative mb-6 group cursor-pointer"
+          whileHover={{ scale: 1.05 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+        >
+          <div className="absolute inset-0 bg-emerald-500/20 dark:bg-emerald-500/10 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+          <img
+            src={`https://avatars.githubusercontent.com/${username}`}
+            alt={username}
+            className="w-24 h-24 sm:w-28 sm:h-28 rounded-full ring-4 ring-emerald-500/30 dark:ring-emerald-500/20 group-hover:ring-emerald-500 transition-all duration-300 object-cover shadow-lg relative z-10"
+            onError={(e) => {
+              // Fallback if image fails to load
+              e.currentTarget.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`;
+            }}
+          />
+        </motion.div>
+
         {/* Badge */}
         <motion.div
           variants={itemVariants}
