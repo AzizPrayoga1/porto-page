@@ -1,3 +1,4 @@
+import { env } from 'cloudflare:workers';
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar';
@@ -7,7 +8,7 @@ import { drizzle } from 'drizzle-orm/d1';
 import * as schema from '../db/schema';
 import { eq } from 'drizzle-orm';
 
-const runtime = Astro.locals.runtime;
+
 const db = runtime?.env?.DB ? drizzle(runtime.env.DB, { schema }) : null;
 
 let projects: any[] = [];
