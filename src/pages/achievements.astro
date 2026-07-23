@@ -10,14 +10,40 @@ import { env } from 'cloudflare:workers';
 const db = env?.DB ? drizzle(env.DB, { schema }) : null;
 
 let achievements: any[] = [];
+let ratingHistory: any[] = [];
+
 if (db) {
   try {
-    achievements = await db.select().from(schema.ctfAchievements);
+    const [ctfList, history] = await Promise.all([
+      db.select().from(schema.ctfAchievements),
+      db.select().from(schema.ctfRatingHistory).orderBy(schema.ctfRatingHistory.year)
+    ]);
+    achievements = ctfList;
+    ratingHistory = history;
   } catch (e) {
-    // Fallback jika database kosong / belum di-migrate
+    // Fallback jika database belum tersambung / belum di-migrate
   }
 }
----
+
+// Fallback data jika DB masih kosong
+const displayAchievements = achievements.length > 0 ? achievements : [
+  {
+    id: "ctf-1",
+    eventName: "Google CTF 2026",
+    eventDate: new Date("2026-06-25").getTime(),
+    rank: 42,
+    points: 1550.5,
+    teamName: "KuroCyber"
+  },
+  {
+    id: "ctf-2",
+    eventName: "DEF CON CTF 34 Quals",
+    eventDate: new Date("2026-05-18").getTime(),
+    rank: 18,
+    points: 3400.0,
+    teamName: "KuroCyber"
+  }
+];
 ---
 
 <Layout title="Achievements | dev&sec.">
@@ -68,5 +94,5 @@ if (db) {
     </div>
   </main>
 
-  <Footer />
+  <Footer client:visible />
 </Layout>
