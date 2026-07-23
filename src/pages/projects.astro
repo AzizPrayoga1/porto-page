@@ -1,4 +1,3 @@
-import { env } from 'cloudflare:workers';
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar';
@@ -7,56 +6,19 @@ import ProjectCard from '../components/ProjectCard';
 import { drizzle } from 'drizzle-orm/d1';
 import * as schema from '../db/schema';
 import { eq } from 'drizzle-orm';
+import { env } from 'cloudflare:workers';
 
-
-const db = runtime?.env?.DB ? drizzle(runtime.env.DB, { schema }) : null;
+const db = env?.DB ? drizzle(env.DB, { schema }) : null;
 
 let projects: any[] = [];
 
 if (db) {
   try {
     projects = await db.select().from(schema.projects).where(eq(schema.projects.isHidden, false));
-  } catch (e) {}
-}
-
-// Fallback mock projects list
-const fallbackProjects = [
-  {
-    id: "repo-1",
-    name: "auto-portfolio",
-    description: "Self-updating developer & CTF portfolio platform on Cloudflare.",
-    language: "TypeScript",
-    topics: ["astro", "cloudflare", "drizzle", "react"],
-    stars: 12,
-    forks: 2,
-    url: "https://github.com/octocat/auto-portfolio",
-    isPinned: true
-  },
-  {
-    id: "repo-2",
-    name: "ctf-exploit-kit",
-    description: "Collection of automated exploit scripts for various CTF categories.",
-    language: "Python",
-    topics: ["ctf", "exploit", "pwn", "security"],
-    stars: 45,
-    forks: 8,
-    url: "https://github.com/octocat/ctf-exploit-kit",
-    isPinned: true
-  },
-  {
-    id: "repo-3",
-    name: "dotfiles",
-    description: "My personal developer workspace configs for Neovim and Tmux.",
-    language: "Lua",
-    topics: ["neovim", "tmux", "dotfiles"],
-    stars: 3,
-    forks: 0,
-    url: "https://github.com/octocat/dotfiles",
-    isPinned: false
+  } catch (e) {
+    // Fallback jika database belum tersambung / kosong
   }
-];
-
-const displayProjects = projects.length > 0 ? projects : fallbackProjects;
+}
 ---
 
 <Layout title="Projects | dev&sec.">
