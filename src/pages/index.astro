@@ -8,37 +8,40 @@ import Contact from '../components/Contact';
 import Footer from '../components/Footer';
 import ProjectCard from '../components/ProjectCard';
 import AchievementCard from '../components/AchievementCard';
+import { drizzle } from 'drizzle-orm/d1';
+import * as schema from '../db/schema';
+import { eq } from 'drizzle-orm';
 
-// Fetch stats & featured content from local worker
-// Degrades gracefully to empty array/mock on build-time
-const API_URL = 'http://localhost:8787';
+// Query D1 directly via Cloudflare runtime binding (SSR)
+const runtime = Astro.locals.runtime;
+const db = runtime?.env?.DB ? drizzle(runtime.env.DB, { schema }) : null;
 
 let stats = { projectsCount: 5, achievementsCount: 4, ctftimeGlobalRating: 145.63, ctftimeCountryRank: 10 };
-let projects = [];
-let achievements = [];
+let projects: any[] = [];
+let achievements: any[] = [];
 
-try {
-  const statsRes = await fetch(`${API_URL}/api/stats`);
-  if (statsRes.ok) stats = await statsRes.json();
-} catch (e) {
-  // Graceful degradation when worker is not running locally during static build
+if (db) {
+  try {
+    const [projList, ctfList, ratingHistory] = await Promise.all([
+      db.select().from(schema.projects).where(eq(schema.projects.isHidden, false)),
+      db.select().from(schema.ctfAchievements).where(eq(schema.ctfAchievements.isHidden, false)),
+      db.select().from(schema.ctfRatingHistory).orderBy(schema.ctfRatingHistory.year),
+    ]);
+    projects = projList;
+    achievements = ctfList;
+    const latest = ratingHistory.filter(r => r.ratingPoints > 0).at(-1);
+    stats = {
+      projectsCount: projList.length || 5,
+      achievementsCount: ctfList.length || 4,
+      ctftimeGlobalRating: latest?.ratingPoints ?? 145.63,
+      ctftimeCountryRank: latest?.countryRank ?? 10,
+    };
+  } catch (e) {
+    // Graceful degradation — use defaults above
+  }
 }
 
-try {
-  const projRes = await fetch(`${API_URL}/api/projects`);
-  if (projRes.ok) {
-    projects = await projRes.json();
-  }
-} catch (e) {}
-
-try {
-  const achRes = await fetch(`${API_URL}/api/achievements`);
-  if (achRes.ok) {
-    achievements = await achRes.json();
-  }
-} catch (e) {}
-
-// Fallbacks if backend is completely down/not run
+// Fallbacks if DB empty / not connected
 const featuredProjects = projects.length > 0 ? projects.slice(0, 2) : [
   {
     id: "repo-1",

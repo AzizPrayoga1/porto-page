@@ -3,20 +3,19 @@ import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ProjectCard from '../components/ProjectCard';
+import { drizzle } from 'drizzle-orm/d1';
+import * as schema from '../db/schema';
+import { eq } from 'drizzle-orm';
 
-const API_URL = 'http://localhost:8787';
-let projects = [];
-let errorMsg = null;
+const runtime = Astro.locals.runtime;
+const db = runtime?.env?.DB ? drizzle(runtime.env.DB, { schema }) : null;
 
-try {
-  const response = await fetch(`${API_URL}/api/projects`);
-  if (response.ok) {
-    projects = await response.json();
-  } else {
-    errorMsg = `Gagal memuat proyek: HTTP ${response.status}`;
-  }
-} catch (e) {
-  errorMsg = "Gagal menghubungi backend API lokal (Worker belum berjalan). Menggunakan data cadangan.";
+let projects: any[] = [];
+
+if (db) {
+  try {
+    projects = await db.select().from(schema.projects).where(eq(schema.projects.isHidden, false));
+  } catch (e) {}
 }
 
 // Fallback mock projects list
@@ -68,11 +67,6 @@ const displayProjects = projects.length > 0 ? projects : fallbackProjects;
       <p class="mt-3 text-lg text-zinc-600 dark:text-zinc-400">
         Daftar proyek open-source yang ditarik secara otomatis dari API GitHub.
       </p>
-      {errorMsg && (
-        <div class="mt-4 p-3 rounded-lg text-xs bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
-          ⚠️ {errorMsg}
-        </div>
-      )}
     </div>
 
     <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
