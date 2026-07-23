@@ -1,5 +1,4 @@
 name = "porto-page"
-main = "./dist/server/entry.mjs"
 compatibility_date = "2026-07-23"
 
 [assets]
