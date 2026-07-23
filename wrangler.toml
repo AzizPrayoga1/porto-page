@@ -1,5 +1,8 @@
 name = "porto-page"
 compatibility_date = "2026-07-23"
+[[kv_namespaces]]
+binding = "SESSION"
+id = "47501062e6084e04a3a784159c8df487"
 
 [assets]
 directory = "./dist/client"
