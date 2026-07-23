@@ -9,6 +9,7 @@ export interface Env {
   GITHUB_TOKEN?: string;
   GITHUB_USERNAME: string;
   CTFTIME_TEAM_ID: string;
+  ASSETS: Fetcher;
 }
 
 export default {
@@ -314,6 +315,10 @@ export default {
             message: `CTFtime sync failed: ${e.message || String(e)}`,
           }, { status: 500, headers: corsHeaders });
         }
+      }
+
+      if (!url.pathname.startsWith('/api/')) {
+        return env.ASSETS.fetch(request);
       }
 
       return new Response('Not Found', { status: 404, headers: corsHeaders });
