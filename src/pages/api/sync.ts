@@ -19,7 +19,7 @@ export const GET: APIRoute = async () => {
     const results = { github: 0, ctfHistory: 0, ctfEvents: 0 };
 
     // ==========================================
-    // 1. FETCH & INSERT GITHUB REPOSITORIES
+    // 1. FETCH GITHUB REPOSITORIES
     // ==========================================
     try {
       const ghHeaders: Record<string, string> = {
@@ -73,7 +73,7 @@ export const GET: APIRoute = async () => {
     }
 
     // ==========================================
-    // 2. FETCH & INSERT CTFTIME RATING HISTORY
+    // 2. FETCH CTFTIME RATING (ONLY YEAR >= 2026)
     // ==========================================
     try {
       const ctfRes = await fetch(`https://ctftime.org/api/v1/teams/${teamId}/`, {
@@ -90,21 +90,21 @@ export const GET: APIRoute = async () => {
 
         if (rating && typeof rating === 'object') {
           for (const yearStr of Object.keys(rating)) {
-            const yearData = rating[yearStr];
             const yearNum = parseInt(yearStr, 10);
-            if (isNaN(yearNum)) continue;
+            
+            // HANYA AMBIL TAHUN 2026 KE ATAS
+            if (isNaN(yearNum) || yearNum < 2026) continue;
 
+            const yearData = rating[yearStr];
             const pts = Number(yearData.rating_points || 0);
             const countryRank = Number(yearData.country_place || 0);
 
-            // Cek apakah data tahun ini sudah ada di DB
             const existing = await db
               .select()
               .from(schema.ctfRatingHistory)
               .where(eq(schema.ctfRatingHistory.year, yearNum));
 
             if (existing.length > 0) {
-              // Update jika sudah ada
               await db
                 .update(schema.ctfRatingHistory)
                 .set({
@@ -114,7 +114,6 @@ export const GET: APIRoute = async () => {
                 })
                 .where(eq(schema.ctfRatingHistory.year, yearNum));
             } else {
-              // Insert baru (biarkan id auto-increment oleh D1)
               await db.insert(schema.ctfRatingHistory).values({
                 year: yearNum,
                 ratingPoints: pts,
@@ -131,45 +130,48 @@ export const GET: APIRoute = async () => {
     }
 
     // ==========================================
-    // 3. INSERT INITIAL CTF ACHIEVEMENTS
+    // 3. FETCH & SYNC ALL CTF EVENTS (2026)
     // ==========================================
     try {
-      const initialEvents = [
-        {
-          id: 'evt-nahamcon-2026',
-          eventName: 'NahamCon CTF 2026',
-          eventDate: new Date('2026-05-02'),
-          rank: 25,
-          points: 1250.0,
-          teamName: 'KuroCyber',
-          isHidden: false,
-          lastSyncedAt: new Date()
-        },
-        {
-          id: 'evt-umd-2026',
-          eventName: 'UMDCTF 2026',
-          eventDate: new Date('2026-04-26'),
-          rank: 12,
-          points: 2100.0,
-          teamName: 'KuroCyber',
-          isHidden: false,
-          lastSyncedAt: new Date()
+      const eventsRes = await fetch(`https://ctftime.org/api/v1/results/2026/`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/json'
         }
-      ];
+      });
 
-      for (const evt of initialEvents) {
-        await db.insert(schema.ctfAchievements).values(evt).onConflictDoUpdate({
-          target: schema.ctfAchievements.id,
-          set: {
-            rank: evt.rank,
-            points: evt.points,
-            lastSyncedAt: new Date()
+      if (eventsRes.ok) {
+        const results2026: Record<string, any> = await eventsRes.json();
+        for (const eventIdStr of Object.keys(results2026)) {
+          const eventItem = results2026[eventIdStr];
+          const scores = eventItem.scores || [];
+          
+          // Cari skor tim KuroCyber / Team ID
+          const teamScore = scores.find((s: any) => String(s.team_id) === String(teamId));
+          if (teamScore) {
+            await db.insert(schema.ctfAchievements).values({
+              id: `evt-${eventIdStr}`,
+              eventName: String(eventItem.title || 'CTF Event 2026'),
+              eventDate: new Date(),
+              rank: Number(teamScore.place || 0),
+              points: Number(teamScore.points || 0),
+              teamName: 'KuroCyber',
+              isHidden: false,
+              lastSyncedAt: new Date()
+            }).onConflictDoUpdate({
+              target: schema.ctfAchievements.id,
+              set: {
+                rank: Number(teamScore.place || 0),
+                points: Number(teamScore.points || 0),
+                lastSyncedAt: new Date()
+              }
+            });
+            results.ctfEvents++;
           }
-        });
-        results.ctfEvents++;
+        }
       }
     } catch (e: any) {
-      errors.push(`CTF Achievements Insert Error: ${e.message}`);
+      errors.push(`CTF Events Sync Error: ${e.message}`);
     }
 
     return new Response(JSON.stringify({

@@ -19,7 +19,4 @@ database_id = "c2e5918d-adaf-437b-9040-8e8e848fb9ee"
 migrations_dir = "drizzle/migrations"
 
 [triggers]
-crons = [
-  "0 0 1 * *",  # Monthly (GitHub)
-  "0 0 * * 1"   # Weekly (CTFtime)
-]
+crons = ["0 0 * * 1"]
