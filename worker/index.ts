@@ -10,6 +10,14 @@ export interface Env {
   GITHUB_USERNAME: string;
   CTFTIME_TEAM_ID: string;
   ASSETS: Fetcher;
+  SYNC_SECRET?: string;
+}
+
+function isAuthorized(request: Request, syncSecret?: string): boolean {
+  if (!syncSecret) return true;
+  const auth = request.headers.get('Authorization') || request.headers.get('x-sync-secret') || request.headers.get('X-Sync-Secret');
+  const token = auth?.startsWith('Bearer ') ? auth.substring(7) : auth;
+  return token === syncSecret;
 }
 
 export default {
@@ -227,6 +235,13 @@ export default {
       }
 
       if (url.pathname === '/api/sync/github' && request.method === 'POST') {
+        if (!isAuthorized(request, env.SYNC_SECRET)) {
+          return Response.json({
+            success: false,
+            message: "Unauthorized: Invalid or missing secret token",
+          }, { status: 401, headers: corsHeaders });
+        }
+
         if (!db) {
           return Response.json({
             success: false,
@@ -273,6 +288,13 @@ export default {
       }
 
       if (url.pathname === '/api/sync/ctftime' && request.method === 'POST') {
+        if (!isAuthorized(request, env.SYNC_SECRET)) {
+          return Response.json({
+            success: false,
+            message: "Unauthorized: Invalid or missing secret token",
+          }, { status: 401, headers: corsHeaders });
+        }
+
         if (!db) {
           return Response.json({
             success: false,

@@ -28,15 +28,25 @@ export class ApiClient {
     return this.request<any>('/api/stats');
   }
 
-  async triggerGitHubSync(): Promise<any> {
+  async triggerGitHubSync(secret?: string): Promise<any> {
+    const headers: Record<string, string> = {};
+    if (secret) {
+      headers['Authorization'] = `Bearer ${secret}`;
+    }
     return this.request<any>('/api/sync/github', {
       method: 'POST',
+      headers,
     });
   }
 
-  async triggerCTFtimeSync(): Promise<any> {
+  async triggerCTFtimeSync(secret?: string): Promise<any> {
+    const headers: Record<string, string> = {};
+    if (secret) {
+      headers['Authorization'] = `Bearer ${secret}`;
+    }
     return this.request<any>('/api/sync/ctftime', {
       method: 'POST',
+      headers,
     });
   }
 }

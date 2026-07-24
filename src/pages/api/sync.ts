@@ -6,11 +6,38 @@ import { env } from 'cloudflare:workers';
 
 export const prerender = false;
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async ({ request }) => {
   const debugLog: Record<string, any> = {};
   const errors: string[] = [];
 
   try {
+    const syncSecret = (env as any).SYNC_SECRET;
+    if (syncSecret) {
+      const authHeader = request.headers.get('Authorization');
+      const customHeader = request.headers.get('x-sync-secret') || request.headers.get('X-Sync-Secret');
+
+      let token = '';
+      if (authHeader) {
+        if (authHeader.startsWith('Bearer ')) {
+          token = authHeader.substring(7);
+        } else {
+          token = authHeader;
+        }
+      } else if (customHeader) {
+        token = customHeader;
+      }
+
+      if (token !== syncSecret) {
+        return new Response(JSON.stringify({
+          status: 'error',
+          message: 'Unauthorized: Invalid or missing secret token'
+        }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
     const db = drizzle(env.DB, { schema });
     const username = env.GITHUB_USERNAME || 'AzizPrayoga1';
     const teamId = env.CTFTIME_TEAM_ID || '426938';
