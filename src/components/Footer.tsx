@@ -24,11 +24,11 @@ export default function Footer() {
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="font-mono text-sm font-bold tracking-wider text-zinc-800 dark:text-zinc-200">
-                dev&sec
+                nvc
               </span>
             </div>
             <p className="text-xs tracking-wide text-zinc-400 dark:text-zinc-500 text-center sm:text-left">
-              &copy; {currentYear} dev&sec. All rights reserved.
+              &copy; {currentYear} nvc. All rights reserved.
             </p>
           </div>
 

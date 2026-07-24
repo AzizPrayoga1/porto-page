@@ -7,7 +7,7 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <a href="/" className="text-xl font-bold tracking-tight text-emerald-600 dark:text-emerald-500">
-              dev&sec.
+              nvc.
             </a>
             <div className="hidden md:block ml-10">
               <div className="flex space-x-8">

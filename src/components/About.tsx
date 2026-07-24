@@ -3,7 +3,7 @@ export default function About() {
     languages: ['TypeScript', 'JavaScript', 'Python', 'SQL', 'C/C++'],
     frontend: ['React', 'Astro', 'TailwindCSS', 'HTML5/CSS3'],
     backend: ['Cloudflare Workers', 'Node.js', 'Express', 'Drizzle ORM', 'SQLite', 'PostgreSQL'],
-    security: ['Web Exploitation', 'Reverse Engineering', 'Cryptography', 'Linux Forensics', 'OWASP Top 10']
+    security: ['Web Exploitation (Specialist)', 'Forensics', 'OWASP Top 10']
   };
 
   return (
